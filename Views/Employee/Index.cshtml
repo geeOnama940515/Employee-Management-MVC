@@ -1,0 +1,171 @@
+﻿@model IEnumerable<EmployeeCRUD.Models.EmployeeModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> New Employee</a>
+</p>
+<div class="card-body"> 
+    <table id="employeetable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.EmpNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.MiddleName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.LastName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PhoneNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateOfBirth)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateHired)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Department)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Designation)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Email)
+                </th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EmpNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FirstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MiddleName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PhoneNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateOfBirth)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateHired)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Department)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Designation)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Email)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" style="color: green;"><i class="fa fa-edit"></i></a> |
+                        <a asp-action="Details" asp-route-id="@item.Id" style="color: blue;"><i class="fa fa-eye"></i></a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id" style="color: red;"><i class="fa fa-trash"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Employee Number
+                </th>
+                <th>
+                    First Name
+                </th>
+                <th>
+                    Middle Name
+                </th>
+                <th>
+                    Last Name
+                </th>
+                <th>
+                    Phone Number
+                </th>
+                <th>
+                    Birth Date
+                </th>
+                <th>
+                    Date Hired
+                </th>
+                <th>
+                    Department
+                </th>
+                <th>
+                    Designation
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>Action</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+
+@section Datatable {
+<link rel="stylesheet" href="AdminLTE/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="AdminLTE/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+<link rel="stylesheet" href="AdminLTE/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+}
+
+
+@section ScriptsDatatable{
+    <script src="AdminLTE/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="AdminLTE/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="AdminLTE/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="AdminLTE/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="AdminLTE/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="AdminLTE/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="AdminLTE/plugins/jszip/jszip.min.js"></script>
+    <script src="AdminLTE/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="AdminLTE/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="AdminLTE/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="AdminLTE/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="AdminLTE/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <script>
+        $(function () {
+            $("#employeetable").DataTable({
+                "responsive": true, 
+                "lengthChange": false,
+                "autoWidth": false,
+                "paging":true,
+                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+            // $('#employeetable').DataTable({
+            //     "paging": true,
+            //     "lengthChange": false,
+            //     "searching": false,
+            //     "ordering": true,
+            //     "info": true,
+            //     "autoWidth": false,
+            //     "responsive": true,
+            // });
+        });
+    </script>
+}
+
+
