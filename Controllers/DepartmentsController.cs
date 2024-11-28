@@ -10,25 +10,25 @@ using EmployeeCRUD.Models;
 
 namespace EmployeeCRUD.Controllers
 {
-    public class EmployeeController : Controller
+    public class DepartmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public EmployeeController(ApplicationDbContext context)
+        public DepartmentsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Employee
+        // GET: Departments
         public async Task<IActionResult> Index()
         {
+
             HeaderCrumbs();
 
-
-            return View(await _context.Employees.ToListAsync());
+            return View(await _context.Departments.ToListAsync());
         }
 
-        // GET: Employee/Details/5
+        // GET: Departments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,82 +36,68 @@ namespace EmployeeCRUD.Controllers
                 return NotFound();
             }
 
-            var employeeModel = await _context.Employees
+            var departmentModel = await _context.Departments
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (employeeModel == null)
+            if (departmentModel == null)
             {
-                HeaderCrumbs();
                 return NotFound();
             }
             HeaderCrumbs();
-            return View(employeeModel);
+            return View(departmentModel);
         }
 
-        // GET: Employee/Create
+        // GET: Departments/Create
         public IActionResult Create()
         {
-            // Create a list of anonymous objects with DepartmentId and formatted display string
-            var departments = _context.Departments
-                .Select(d => new
-                {
-                    d.Id,
-                    DepartmentNameAndHead = $"{d.DepartmentName} - {d.DepartmentHead}"
-                })
-                .ToList();  // Convert to list to avoid IQueryable<string>
-
-            // Pass the list to SelectList, using Id as the value and DepartmentNameAndHead as the display text
-            ViewData["DepartmentId"] = new SelectList(departments, "Id", "DepartmentNameAndHead");
-
             HeaderCrumbs();
             return View();
         }
 
-        // POST: Employee/Create
+        // POST: Departments/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(EmployeeModel employeeModel)
+        public async Task<IActionResult> Create(DepartmentModel departmentModel)
         {
-            HeaderCrumbs();
-            employeeModel.CreatedBy = "GeeRax94";
+            departmentModel.DateCreated = DateTime.Now;
+            departmentModel.CreatedBy = "Hello World";
             if (ModelState.IsValid)
             {
-                _context.Add(employeeModel);
+                _context.Add(departmentModel);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(employeeModel);
+            HeaderCrumbs();
+            return View(departmentModel);
         }
 
-        // GET: Employee/Edit/5
+        // GET: Departments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            HeaderCrumbs();
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employeeModel = await _context.Employees.FindAsync(id);
-            employeeModel.DateUpdated = DateTime.Now;
-            employeeModel.UpdateBy = "GeeRax94";
-            if (employeeModel == null)
+            var departmentModel = await _context.Departments.FindAsync(id);
+            if (departmentModel == null)
             {
                 return NotFound();
             }
-            return View(employeeModel);
+            HeaderCrumbs();
+            return View(departmentModel);
         }
 
-        // POST: Employee/Edit/5
+        // POST: Departments/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,EmpNumber,FirstName,MiddleName,LastName,PhoneNumber,DateOfBirth,DateHired,Department,Designation,Email,Address,DateCreated,DateUpdated,UpdateBy,CreatedBy")] EmployeeModel employeeModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,DepartmentName,DepartmentHead,DateCreated,DateUpdated,UpdateBy,CreatedBy")] DepartmentModel departmentModel)
         {
             HeaderCrumbs();
-            if (id != employeeModel.Id)
+            if (id != departmentModel.Id)
             {
                 return NotFound();
             }
@@ -120,12 +106,14 @@ namespace EmployeeCRUD.Controllers
             {
                 try
                 {
-                    _context.Update(employeeModel);
+                    departmentModel.DateUpdated = DateTime.Now;
+                    departmentModel.UpdateBy = "This is spartaaa";
+                    _context.Update(departmentModel);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeModelExists(employeeModel.Id))
+                    if (!DepartmentModelExists(departmentModel.Id))
                     {
                         return NotFound();
                     }
@@ -136,10 +124,10 @@ namespace EmployeeCRUD.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(employeeModel);
+            return View(departmentModel);
         }
 
-        // GET: Employee/Delete/5
+        // GET: Departments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             HeaderCrumbs();
@@ -148,44 +136,47 @@ namespace EmployeeCRUD.Controllers
                 return NotFound();
             }
 
-            var employeeModel = await _context.Employees
+            var departmentModel = await _context.Departments
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (employeeModel == null)
+            if (departmentModel == null)
             {
                 return NotFound();
             }
-
-            return View(employeeModel);
+            
+            return View(departmentModel);
         }
 
-        // POST: Employee/Delete/5
+        // POST: Departments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             HeaderCrumbs();
-            var employeeModel = await _context.Employees.FindAsync(id);
-            if (employeeModel != null)
+            var departmentModel = await _context.Departments.FindAsync(id);
+            if (departmentModel != null)
             {
-                _context.Employees.Remove(employeeModel);
+                _context.Departments.Remove(departmentModel);
             }
 
             await _context.SaveChangesAsync();
+            
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EmployeeModelExists(int id)
+        private bool DepartmentModelExists(int id)
         {
-            return _context.Employees.Any(e => e.Id == id);
+
+            return _context.Departments.Any(e => e.Id == id);
         }
+
         private void HeaderCrumbs()
         {
             // Set dynamic data
-            ViewBag.PageTitle = "Employees";
+            ViewBag.PageTitle = "Departments";
             ViewBag.Breadcrumbs = new List<Breadcrumb>
         {
             new Breadcrumb { Name = "Home", Link = Url.Action("Index", "Home") },
-            new Breadcrumb { Name = "Employees List", Link = null } // Current page
+            new Breadcrumb { Name = "Departments List", Link = null } // Current page
         };
         }
     }

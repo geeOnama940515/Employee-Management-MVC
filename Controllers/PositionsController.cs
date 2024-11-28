@@ -7,28 +7,38 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EmployeeCRUD.Data;
 using EmployeeCRUD.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EmployeeCRUD.Controllers
 {
-    public class EmployeeController : Controller
+    public class PositionsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public EmployeeController(ApplicationDbContext context)
+        public PositionsController(ApplicationDbContext context)
         {
             _context = context;
         }
-
-        // GET: Employee
+        private void HeaderCrumbs() 
+        {
+            // Set dynamic data
+            ViewBag.PageTitle = "Positions";
+            ViewBag.Breadcrumbs = new List<Breadcrumb>
+        {
+            new Breadcrumb { Name = "Home", Link = Url.Action("Index", "Home") },
+            new Breadcrumb { Name = "Positions List", Link = null } // Current page
+        };
+        }
+        // GET: Positions
         public async Task<IActionResult> Index()
         {
             HeaderCrumbs();
 
-
-            return View(await _context.Employees.ToListAsync());
+            var applicationDbContext = _context.Positions.Include(p => p.Department);
+            return View(await applicationDbContext.ToListAsync());
         }
 
-        // GET: Employee/Details/5
+        // GET: Positions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,20 +46,21 @@ namespace EmployeeCRUD.Controllers
                 return NotFound();
             }
 
-            var employeeModel = await _context.Employees
+            var positionsModel = await _context.Positions
+                .Include(p => p.Department)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (employeeModel == null)
+            if (positionsModel == null)
             {
-                HeaderCrumbs();
                 return NotFound();
             }
-            HeaderCrumbs();
-            return View(employeeModel);
+
+            return View(positionsModel);
         }
 
-        // GET: Employee/Create
+        // GET: Positions/Create
         public IActionResult Create()
         {
+
             // Create a list of anonymous objects with DepartmentId and formatted display string
             var departments = _context.Departments
                 .Select(d => new
@@ -63,55 +74,64 @@ namespace EmployeeCRUD.Controllers
             ViewData["DepartmentId"] = new SelectList(departments, "Id", "DepartmentNameAndHead");
 
             HeaderCrumbs();
+
             return View();
         }
 
-        // POST: Employee/Create
+        [HttpGet, ActionName("GetPositionsById")]
+        public JsonResult GetPositionsById(int DepartmentId)
+        {
+            List<PositionsModel> positionsList = new List<PositionsModel>();
+            positionsList = _context.Positions.Where(s => s.DepartmentId.Equals(DepartmentId)).ToList();
+            return Json(positionsList);
+        }
+
+        // POST: Positions/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(EmployeeModel employeeModel)
+        public async Task<IActionResult> Create(PositionsModel positionsModel)
         {
             HeaderCrumbs();
-            employeeModel.CreatedBy = "GeeRax94";
             if (ModelState.IsValid)
             {
-                _context.Add(employeeModel);
+                positionsModel.CreatedBy = "Myoi Mina";
+                positionsModel.DateCreated = DateTime.Now;
+                _context.Add(positionsModel);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(employeeModel);
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", positionsModel.DepartmentId);
+            return View(positionsModel);
         }
 
-        // GET: Employee/Edit/5
+        // GET: Positions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            HeaderCrumbs();
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employeeModel = await _context.Employees.FindAsync(id);
-            employeeModel.DateUpdated = DateTime.Now;
-            employeeModel.UpdateBy = "GeeRax94";
-            if (employeeModel == null)
+            var positionsModel = await _context.Positions.FindAsync(id);
+            if (positionsModel == null)
             {
                 return NotFound();
             }
-            return View(employeeModel);
+            HeaderCrumbs();
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", positionsModel.DepartmentId);
+            return View(positionsModel);
         }
 
-        // POST: Employee/Edit/5
+        // POST: Positions/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,EmpNumber,FirstName,MiddleName,LastName,PhoneNumber,DateOfBirth,DateHired,Department,Designation,Email,Address,DateCreated,DateUpdated,UpdateBy,CreatedBy")] EmployeeModel employeeModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,PositionName,DepartmentId,DateCreated,DateUpdated,UpdateBy,CreatedBy")] PositionsModel positionsModel)
         {
-            HeaderCrumbs();
-            if (id != employeeModel.Id)
+            if (id != positionsModel.Id)
             {
                 return NotFound();
             }
@@ -120,12 +140,12 @@ namespace EmployeeCRUD.Controllers
             {
                 try
                 {
-                    _context.Update(employeeModel);
+                    _context.Update(positionsModel);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeModelExists(employeeModel.Id))
+                    if (!PositionsModelExists(positionsModel.Id))
                     {
                         return NotFound();
                     }
@@ -136,57 +156,48 @@ namespace EmployeeCRUD.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(employeeModel);
+            HeaderCrumbs();
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", positionsModel.DepartmentId);
+            return View(positionsModel);
         }
 
-        // GET: Employee/Delete/5
+        // GET: Positions/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            HeaderCrumbs();
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employeeModel = await _context.Employees
+            var positionsModel = await _context.Positions
+                .Include(p => p.Department)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (employeeModel == null)
+            if (positionsModel == null)
             {
                 return NotFound();
             }
-
-            return View(employeeModel);
+            HeaderCrumbs();
+            return View(positionsModel);
         }
 
-        // POST: Employee/Delete/5
+        // POST: Positions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            HeaderCrumbs();
-            var employeeModel = await _context.Employees.FindAsync(id);
-            if (employeeModel != null)
+            var positionsModel = await _context.Positions.FindAsync(id);
+            if (positionsModel != null)
             {
-                _context.Employees.Remove(employeeModel);
+                _context.Positions.Remove(positionsModel);
             }
-
+            HeaderCrumbs();
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EmployeeModelExists(int id)
+        private bool PositionsModelExists(int id)
         {
-            return _context.Employees.Any(e => e.Id == id);
-        }
-        private void HeaderCrumbs()
-        {
-            // Set dynamic data
-            ViewBag.PageTitle = "Employees";
-            ViewBag.Breadcrumbs = new List<Breadcrumb>
-        {
-            new Breadcrumb { Name = "Home", Link = Url.Action("Index", "Home") },
-            new Breadcrumb { Name = "Employees List", Link = null } // Current page
-        };
+            return _context.Positions.Any(e => e.Id == id);
         }
     }
 }

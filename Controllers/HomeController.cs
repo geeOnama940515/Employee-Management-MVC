@@ -15,6 +15,15 @@ namespace EmployeeCRUD.Controllers
 
         public IActionResult Index()
         {
+
+            // Set dynamic data
+            ViewBag.PageTitle = "Dashboard";
+            ViewBag.Breadcrumbs = new List<Breadcrumb>
+        {
+            new Breadcrumb { Name = "Home", Link = Url.Action("Index", "Home") },
+            new Breadcrumb { Name = "Dashboard v1", Link = null } // Current page
+        };
+
             return View();
         }
 
